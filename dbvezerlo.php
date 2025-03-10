@@ -1,52 +1,39 @@
 <?php
+class DBVezerlo {
+	private $conn = null;
+	private $host = "localhost";
+	private $user = "root";
+	private $password = "";
+	private $database = "oscar";
 
-class DBController
-{
-    private $conn = null;
-    private $host = "localhost";
-    private $user = "root";
-    private $password = "";
-    private $database = "oscar";
+	function __construct() {
+		$conn = $this->connectDB();
+		if(!empty($conn)) {
+			$this->conn = $conn;			
+		}
+	}
 
-    function __construct()
-    {
-        $this->connectDB();
-    }
+	function connectDB() {
+		$conn = mysqli_connect($this->host,$this->user,
+		$this->password,$this->database);
+		return $conn;
+	}
 
-    function connectDB()
-    {
-        try
-        {
-            $this->conn = new PDO("mysql:host={$this->host};
-            dbname={$this->database};charset=utf8",
-            $this->user, $this->password);
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE,
-            PDO::ERRMODE_EXCEPTION);
-        }
-        catch (PDOException $e)
-        {
-            die("Connection failed: " . $e->getMessage());
-        }
-    }
+	function executeSelectQuery($query) {
+		$result = mysqli_query($this->conn,$query);
+		while($row=mysqli_fetch_assoc($result)) {
+			$resultset[] = $row;
+		}
+		if(!empty($resultset))
+			return $resultset;
+	}
 
-    function executeSelectQuery($query, $params =[])
-    {
-        try
-        {
-            $stmt=$this->conn->prepare($query);
-            $stmt->execute($params);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        }
-        catch (PDOException $e)
-        {
-            die("Query failed: " . $e->getMessage());
+	function closeDB() {
+        if (!empty($this->conn)) {
+            mysqli_close($this->conn);
+            $this->conn = null;
         }
     }
 
-    function closeDB()
-    {
-        $this->conn=null;    
-    }
 }
-
 ?>
